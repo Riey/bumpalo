@@ -806,9 +806,7 @@ impl<'bump, T: 'bump> Vec<'bump, T> {
         let len = self.len();
         mem::forget(self);
 
-        unsafe {
-            slice::from_raw_parts_mut(ptr, len)
-        }
+        unsafe { slice::from_raw_parts_mut(ptr, len) }
     }
 
     /// Shortens the vector, keeping the first `len` elements and dropping
@@ -2368,6 +2366,44 @@ where
         self.for_each(drop);
         unsafe {
             self.vec.set_len(self.old_len - self.del);
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn segfault() {
+        let bump = Bump::new();
+
+        let mut v1: Vec<u32> = Vec::new_in(&bump);
+
+        v1.reserve(6000);
+
+        for _ in 0..6000 {
+            v1.push(0);
+        }
+
+        let mut v2: Vec<u32> = Vec::new_in(&bump);
+
+        v2.reserve(500);
+
+        for _ in 0..500 {
+            v2.push(0);
+        }
+
+        let mut v3: Vec<u32> = Vec::new_in(&bump);
+
+        v3.reserve(1000);
+
+        for _ in 0..1000 {
+            v3.push(0);
+        }
+
+        for _ in 0..6001 {
+            v1.push(0);
         }
     }
 }
