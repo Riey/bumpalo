@@ -678,6 +678,21 @@ mod tests {
     use super::*;
 
     #[test]
+    fn unit_test_failed() {
+        let bump = Bump::new();
+
+        let mut v1: RawVec<u32> = RawVec::new_in(&bump);
+        v1.reserve(0, 6000);
+        let mut v2: RawVec<u32> = RawVec::new_in(&bump);
+        v2.reserve(0, 500);
+        let mut v3: RawVec<u32> = RawVec::new_in(&bump);
+        v3.reserve(0, 1000);
+
+        v1.reserve(v1.cap(), 1);
+        v1.reserve(v1.cap(), 1);
+    }
+
+    #[test]
     fn reserve_does_not_overallocate() {
         let bump = Bump::new();
         {
